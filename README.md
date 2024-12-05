@@ -1,4 +1,4 @@
-# Video Frame Viewer and Processor
+# Video Frame Upscaler and Processor
 
 This **Python** script allows you to process a video by applying filters to each frame and displaying the frames one by one for manual viewing. It also saves the processed video to an output file.
 Requirements
