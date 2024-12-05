@@ -10,9 +10,9 @@ Before running the script, ensure that you have the following libraries installe
     tqdm
 
 You can install them using pip:
-
-pip install opencv-python matplotlib tqdm
-
+``` bash
+pip install -r requirements.txt
+```
 How to Run
 
     Make sure the video file you want to process is available.
