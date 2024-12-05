@@ -13,10 +13,13 @@ You can install them using pip:
 ``` bash
 pip install -r requirements.txt
 ```
-How to Run
+How to Run:
+```py
+python upscale.py sample.mp4
+```
 
-    Make sure the video file you want to process is available.
-    Run the script from the command line and provide the video file path as an argument.
+Make sure the video file you want to process is available.
+Run the script from the command line and provide the video file path as an argument.
 
 # Example:
 
