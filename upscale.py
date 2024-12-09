@@ -24,6 +24,10 @@ def parse_arguments():
         help="Включение обработки с помощью CUDA (по умолчанию: False)"
     )
     parser.add_argument(
+        "--nosound", action="store_true",
+        help="Пропустить обработку звука (по умолчанию: False)"
+    )
+    parser.add_argument(
         "-o", "--output", 
         type=str, 
         default="output.mp4", 
@@ -58,10 +62,19 @@ def parse_arguments():
 
 def extract_audio(input_video, audio_file):
     try:
+        result = subprocess.run(
+            ["ffmpeg", "-i", input_video],
+            stderr=subprocess.PIPE, stdout=subprocess.DEVNULL, text=True
+        )
+        if "Audio:" not in result.stderr:
+            print("Аудио дорожка отсутствует, пропускаем извлечение.")
+            return False
+
         subprocess.run([
             "ffmpeg", "-i", input_video, "-q:a", "0", "-map", "a", audio_file
         ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print("Аудио успешно извлечено.")
+        return True
     except subprocess.CalledProcessError as e:
         print(f"Ошибка извлечения аудио: {e}")
         sys.exit(1)
@@ -95,14 +108,19 @@ def frame_processor(input_queue, output_queue, args, scaled_size, use_cuda, use_
             if use_cuda:
                 gpu_frame = cv.cuda_GpuMat()
                 gpu_frame.upload(frame)
-                gpu_frame = cv.cuda.bilateralFilter(gpu_frame, args.level, args.sigma_color, args.sigma_space)
-                frame = gpu_frame.download()
+
+                gpu_filtered = cv.cuda.bilateralFilter(gpu_frame, args.level, args.sigma_color, args.sigma_space)
+                gpu_resized = cv.cuda.resize(gpu_filtered, scaled_size)
+
+                frame = gpu_resized.download()
             elif use_ocl:
                 frame = cv.bilateralFilter(frame, args.level, args.sigma_color, args.sigma_space)
             else:
                 frame = cv.bilateralFilter(frame, args.level, args.sigma_color, args.sigma_space)
 
-            frame = cv.resize(frame, scaled_size, interpolation=cv.INTER_LANCZOS4)
+            if not use_cuda:  # Для OpenCL и CPU
+                frame = cv.resize(frame, scaled_size, interpolation=cv.INTER_LANCZOS4)
+
             output_queue.put((frame_id, frame))
         except Exception as e:
             print(f"Ошибка обработки кадра {frame_id}: {e}")
@@ -114,6 +132,7 @@ def main():
     
     use_cuda = args.cuda
     use_ocl = args.ocl
+    skip_audio = args.nosound
 
     if use_ocl:
         cv.ocl.setUseOpenCL(True)
@@ -143,8 +162,11 @@ def main():
     temp_video_path = "temp_video.mp4"
     audio_file = "temp_audio.aac"
     final_output_path = "final_" + output_path
-    
-    extract_audio(args.video, audio_file)
+
+    if not skip_audio:
+        audio_extracted = extract_audio(args.video, audio_file)
+    else:
+        audio_extracted = False
 
     fourcc = cv.VideoWriter_fourcc(*'mp4v')
     out = cv.VideoWriter(temp_video_path, fourcc, fps, scaled_size)
@@ -205,9 +227,15 @@ def main():
         cv.destroyAllWindows()
         progress_bar.close()
 
-    merge_audio_video(temp_video_path, audio_file, final_output_path)
+    if not skip_audio and audio_extracted:
+        merge_audio_video(temp_video_path, audio_file, final_output_path)
+    else:
+        os.rename(temp_video_path, final_output_path)
 
-    cleanup_temp_files(temp_video_path, audio_file)
+    if not skip_audio:
+        cleanup_temp_files(temp_video_path, audio_file)
+    else:
+        cleanup_temp_files(temp_video_path)
 
 if __name__ == "__main__":
     main()
