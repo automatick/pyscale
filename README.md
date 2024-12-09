@@ -23,12 +23,12 @@ Run the script from the command line and provide the video file path as an argum
 
 # Example:
 
-#*Before image:*
+# *Before image:*
 
 ![image](https://github.com/user-attachments/assets/d7c41072-cee0-4dcc-afae-18879282eaa1)
 
 
-#*After image:*
+# *After image:*
 
 ![image](https://github.com/user-attachments/assets/c3ee72d6-5ad6-4eae-9954-63324fb009cc)
 
