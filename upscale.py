@@ -118,7 +118,7 @@ def frame_processor(input_queue, output_queue, args, scaled_size, use_cuda, use_
             else:
                 frame = cv.bilateralFilter(frame, args.level, args.sigma_color, args.sigma_space)
 
-            if not use_cuda:  # Для OpenCL и CPU
+            if not use_cuda:
                 frame = cv.resize(frame, scaled_size, interpolation=cv.INTER_LANCZOS4)
 
             output_queue.put((frame_id, frame))
