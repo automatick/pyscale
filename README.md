@@ -24,10 +24,12 @@ Run the script from the command line and provide the video file path as an argum
 # Example:
 
 Before image:
-![before](https://github.com/user-attachments/assets/7fa0b078-6d84-42cf-bf09-93d71ab787d8)
+![image](https://github.com/user-attachments/assets/d7c41072-cee0-4dcc-afae-18879282eaa1)
+
 
 After image:
-![after](https://github.com/user-attachments/assets/0775658d-4fb6-41b9-892c-eb27fb685a05)
+![image](https://github.com/user-attachments/assets/c3ee72d6-5ad6-4eae-9954-63324fb009cc)
+
 
 
 Where video_name.mp4 is the name of the video you want to process.
